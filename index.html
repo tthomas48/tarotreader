@@ -131,13 +131,15 @@ strong {
 
 <canvas class="background"></canvas>
 <!--script src="https://npmcdn.com/comet-css@1.2.0/dist/comet.min.css"></script-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.1/particles.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.3/particles.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.0.1/Tone.min.js"></script>
 <script>
 var particles = Particles.init({
   selector: '.background',
   color: '#DA0463',
-  connectParticles: false
+  maxParticles: 355,
+  sizeVariations: 10,
+  speed: 1.5
 });
 
 var synth = new Tone.Synth({
@@ -254,16 +256,19 @@ function playNote(cmd) {
 var cmdBuffer = [];
 var lastCommand;
 document.addEventListener('keydown', function(event) {
-  if (isCorrect()) {
-    return;
-  }
-  if (event.which === 13) {
-    lastCommand = cmdBuffer.join('');
-    cmdBuffer = [];
-    playNote(lastCommand);
-    return;
-  }
-  cmdBuffer[cmdBuffer.length] = event.which - 48;
+  Tone.context.resume().then(function () {
+
+    if (isCorrect()) {
+      return;
+    }
+    if (event.which === 13) {
+      lastCommand = cmdBuffer.join('');
+      cmdBuffer = [];
+      playNote(lastCommand);
+      return;
+    }
+    cmdBuffer[cmdBuffer.length] = event.which - 48;
+  });
 });
 
 </script>
