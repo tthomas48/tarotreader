@@ -1,0 +1,270 @@
+<html>
+<head>
+<style>
+html,
+body {
+  height: 100%
+}
+
+body {
+  display: flex;
+  align-items: center;
+  background-color: #040407;
+}
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 50px;
+  background-color: #fff;
+  box-shadow: 0 0 24px 0 rgba(0, 0, 0, 0.06), 0 1px 0 0 rgba(0, 0, 0, 0.02);
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+}
+
+.blockwrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+.musicblock {
+  width: 100px;
+  height: 100px;
+  background: blue;
+  border-radius: 100px;
+  display: flex;
+}
+
+.box1 {
+  background: #8b92f2;
+}
+
+.box2 {
+  background: #341a7e;
+}
+
+.box3 {
+  background: #c296da;
+}
+
+.box4 {
+  background: #5753d9;
+}
+
+.box5 {
+  background: #341a7e;
+}
+
+.box6 {
+  background: #5753d9;
+}
+
+@keyframes glowing {
+  0% {
+    box-shadow: 0 0 -50px #5753d9;
+  }
+  40% {
+    box-shadow: 0 0 70px #5753d9;
+  }
+  60% {
+    box-shadow: 0 0 70px #5753d9;
+  }
+  100% {
+    box-shadow: 0 0 -50px #5753d9;
+  }
+}
+
+.music-glow {
+  animation: glowing 1000ms infinite;
+}
+
+.answerwrapper {
+  display: none;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.answer {
+  font-size: 3em;
+}
+
+strong {
+  color: #DA0463;
+}
+</style>
+</head>
+<div class="blockwrapper">
+
+  <div class="box1 musicblock">
+
+  </div>
+  <div class="box2 musicblock">
+
+  </div>
+  <div class="box3 musicblock">
+
+  </div>
+  <div class="box4 musicblock">
+
+  </div>
+  <div class="box5 musicblock">
+
+  </div>
+  <div class="box6 musicblock">
+  </div>
+</div>
+<div class="answerwrapper">
+
+  <div class="answer">
+    Have you tried <strong>Alec</strong>?
+  </div>
+</div>
+
+<canvas class="background"></canvas>
+<!--script src="https://npmcdn.com/comet-css@1.2.0/dist/comet.min.css"></script-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/particlesjs/2.2.1/particles.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/13.0.1/Tone.min.js"></script>
+<script>
+var particles = Particles.init({
+  selector: '.background',
+  color: '#DA0463',
+  connectParticles: false
+});
+
+var synth = new Tone.Synth({
+  "oscillator": {
+    "type": "fatcustom",
+    "partials": [0.2, 1, 0, 0.5, 0.1],
+    "spread": 40,
+    "count": 3
+  },
+  "envelope": {
+    "attackCurve": "linear",
+    "attack": 0.001,
+    "decay": 1.6,
+    "decayCurve": "exponential",
+    "sustain": 0,
+    "release": 1.6,
+  },
+  "portamento": 0.20
+}).toMaster();
+Tone.Transport.start();
+
+var glowMap = {
+  'B3': 'box1',
+  'D4': 'box2',
+  'D#4': 'box3',
+  'F4': 'box4',
+  'F#4': 'box5',
+  'G4': 'box6',
+};
+
+function glow(note) {
+  var el = document.querySelector('.' + glowMap[note]);
+  el.classList.add('music-glow');
+  setTimeout(function() {
+    el.classList.remove('music-glow')
+  }, 350);
+}
+
+function glowAll() {
+  var els = document.querySelectorAll('.musicblock');
+  for (i = 0; i < els.length; i++) {
+    var el = els[i];
+    el.classList.add('music-glow');
+    setTimeout(
+      function(el) {
+        el.classList.remove('music-glow')
+      }.bind(undefined, el), 1000);
+  }
+}
+
+
+var correct = ['B3', 'G4', 'D4', 'D#4', 'D#4', 'F#4', 'F4'];
+var notes = ['B3', 'G4', null, 'D4', null, 'D#4', 'D#4', null, 'F#4', null, 'F4']
+
+function playHelp() {
+  var synthPart = new Tone.Sequence(
+    function(time, note) {
+      glow(note);
+      synth.triggerAttackRelease(note, "10hz", time);
+    },
+    notes,
+    "4n"
+  );
+  synthPart.loop = 0;
+  synthPart.start();
+}
+var noteMap = {
+  '0846220292': 'B3',
+  '0846223876': 'D4',
+  '0846215428': 'D#4',
+  '0846219012': 'F4',
+  '0846215172': 'F#4',
+  '0847060484': 'G4',
+};
+
+
+var played = [];
+
+function isCorrect() {
+  return JSON.stringify(correct) === JSON.stringify(played);
+}
+
+function playNote(cmd) {
+  const note = noteMap[cmd];
+  if (!note) {
+    return;
+  }
+  played.push(note);
+  var synthPart = new Tone.Sequence(
+    function(time, note) {
+      glow(note);
+      synth.triggerAttackRelease(note, "10hz", time);
+    }, [note],
+    "4n"
+  );
+  synthPart.loop = 0;
+  synthPart.start();
+
+  const allNotes = Object.keys(glowMap);
+  if (played.length === correct.length && !isCorrect()) {
+    played = [];
+    glowAll();
+    setTimeout(playHelp, 1000);
+    return;
+  } else if (isCorrect()) {
+    document.querySelector('.blockwrapper').style.display = 'none';
+    document.querySelector('.answerwrapper').style.display = 'flex';
+    return;
+  }
+
+
+}
+
+var cmdBuffer = [];
+var lastCommand;
+document.addEventListener('keydown', function(event) {
+  if (isCorrect()) {
+    return;
+  }
+  if (event.which === 13) {
+    lastCommand = cmdBuffer.join('');
+    cmdBuffer = [];
+    playNote(lastCommand);
+    return;
+  }
+  cmdBuffer[cmdBuffer.length] = event.which - 48;
+});
+
+</script>
+</html>
